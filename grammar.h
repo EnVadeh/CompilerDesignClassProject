@@ -1,6 +1,7 @@
 #pragma once
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
+#include <string>
 #include <string.h>
 
 class GRAMMAR_SOURCE
@@ -10,9 +11,10 @@ class GRAMMAR_SOURCE
 	char c;
 	unsigned int i;
 	unsigned int src_size;
+    unsigned int productions;
     bool fromArrow; //0 for left, 1 for right
     std::string left_grammar;
-    std::string right_grammar;
+    std::string right_grammar[5];
 
     GRAMMAR_SOURCE(char* source);
 
@@ -28,8 +30,8 @@ class GRAMMAR_SOURCE
 
     void CHECK_LEFT_RECURCSION();
 
+    void SKIP_SPACE();
+
 };
-
-
 
 #endif
