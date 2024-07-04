@@ -60,11 +60,32 @@ bool GRAMMAR_SOURCE::PEEK_FUNCTION(){
 
 void GRAMMAR_SOURCE::CHECK_LEFT_RECURCSION(){
   GRAMMAR_LEFT();
-  std::cout<<"Left grammar:"<<left_grammar<<std::endl;
-  for(int x = 0; x <= productions; x++)
-  std::cout<<"right grammar:"<<right_grammar[x]<<std::endl;
-  
+  std::cout<<"Original production is: "<<std::endl;
+  std::cout<<left_grammar[0]<<" -> ";
+  for(int z = 0; z <productions; z++)
+  std::cout<<right_grammar[z]<<" |";
+  std::cout<<right_grammar[productions]<<std::endl;
+  if(left_grammar[0]==right_grammar[0][0])
+  REMOVE_RECURSION();
 }
+
+void GRAMMAR_SOURCE::REMOVE_RECURSION(){
+  int x = 1;
+  int temp = 0;
+  std::string temp_grammar;
+  while(right_grammar[0][x]!='\0'){
+  temp++;
+  temp_grammar +=right_grammar[0][x];
+  x++;
+  }
+  temp_grammar = temp_grammar + left_grammar[0] + "'";
+  std::cout<<"Left recursion removed productions are : "<<std::endl<<left_grammar[0]<<" -> ";
+  for(int z = 1; z <productions; z++)
+  std::cout<<right_grammar[z]<<left_grammar[0]<<"' |";
+  std::cout<<right_grammar[productions]<<left_grammar[0]<<"'"<<std::endl;
+  std::cout<<left_grammar[0]<<"' -> "<<temp_grammar<<" | "<<"e"<<std::endl;
+}
+
 //we make the user input the grammars in a way. 
 // A -> A|B
 // A -> A'B
@@ -73,7 +94,7 @@ void GRAMMAR_SOURCE::CHECK_LEFT_RECURCSION(){
 //will need to store lefts, and first rights, and second and third rights.
 
 int main(){
-  std::string test = "A->B|C|D";
+  std::string test = "A->Axyz|C|D";
   char* source = &test[0];
   GRAMMAR_SOURCE GS(source);
   GS.CHECK_LEFT_RECURCSION();

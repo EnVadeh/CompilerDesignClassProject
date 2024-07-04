@@ -32,6 +32,8 @@ class GRAMMAR_SOURCE
 
     void SKIP_SPACE();
 
+    void REMOVE_RECURSION();
+
 };
 
 #endif
