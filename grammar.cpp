@@ -17,14 +17,12 @@ void GRAMMAR_SOURCE::GRAMMAR_NEXT(){
 }
 
 void GRAMMAR_SOURCE::GRAMMAR_LEFT(){
-
-
+  left_grammar += c;
 }
 
 
 void GRAMMAR_SOURCE::GRAMMAR_RIGHT(){
-
-
+  right_grammar += c;
 }
 
 bool GRAMMAR_SOURCE::PEEK_FUNCTION(){
@@ -36,6 +34,11 @@ bool GRAMMAR_SOURCE::PEEK_FUNCTION(){
     return false;
 }
 
+void GRAMMAR_SOURCE::CHECK_LEFT_RECURCSION(){
+  
+  GRAMMAR_NEXT();
+
+}
 //we make the user input the grammars in a way. 
 // A -> A/B
 // A -> A'B
