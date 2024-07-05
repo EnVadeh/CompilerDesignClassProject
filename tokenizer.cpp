@@ -149,9 +149,3 @@ void store_add(TOKEN_T* tok, TOKEN_COUNTER_STRUCT* store) {
     store->counter++;
     store->max_token++;
 }
-
-
-
-
-
-

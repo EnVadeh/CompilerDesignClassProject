@@ -34,6 +34,10 @@ class GRAMMAR_SOURCE
 
     void REMOVE_RECURSION();
 
+    void CHECK_LEFT_FACTORING();
+
+    void REMOVE_FACTORING();
+
 };
 
 #endif

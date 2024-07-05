@@ -7,7 +7,7 @@ GRAMMAR_SOURCE::GRAMMAR_SOURCE(char* source){
   this->source = source;
   i = 0;
   src_size = strlen(source);
-  productions = 0;
+  productions = 1;
   c = source[0];
 }
 
@@ -40,7 +40,7 @@ void GRAMMAR_SOURCE::GRAMMAR_RIGHT(){ //A->BC|C
   GRAMMAR_NEXT();
   productions++;
   }
-  right_grammar[productions] += c; //ofc this doesn't work if the grammar has error like this: A->B|... 
+  right_grammar[productions-1] += c; //ofc this doesn't work if the grammar has error like this: A->B|... 
   GRAMMAR_NEXT();
   }
 }
@@ -60,11 +60,10 @@ bool GRAMMAR_SOURCE::PEEK_FUNCTION(){
 
 void GRAMMAR_SOURCE::CHECK_LEFT_RECURCSION(){
   GRAMMAR_LEFT();
-  std::cout<<"Original production is: "<<std::endl;
-  std::cout<<left_grammar[0]<<" -> ";
-  for(int z = 0; z <productions; z++)
-  std::cout<<right_grammar[z]<<" |";
-  std::cout<<right_grammar[productions]<<std::endl;
+  std::cout<<"Original production is:"<<std::endl<<left_grammar[0]<<" -> ";
+  for(int z = 1; z <productions; z++)
+  std::cout<<right_grammar[z-1]<<" |";
+  std::cout<<right_grammar[productions-1]<<std::endl;
   if(left_grammar[0]==right_grammar[0][0])
   REMOVE_RECURSION();
 }
@@ -79,11 +78,49 @@ void GRAMMAR_SOURCE::REMOVE_RECURSION(){
   x++;
   }
   temp_grammar = temp_grammar + left_grammar[0] + "'";
-  std::cout<<"Left recursion removed productions are : "<<std::endl<<left_grammar[0]<<" -> ";
-  for(int z = 1; z <productions; z++)
+  std::cout<<"Left recursion removed productions are:"<<std::endl<<left_grammar[0]<<" -> ";
+  for(int z = 1; z <productions-1; z++)
   std::cout<<right_grammar[z]<<left_grammar[0]<<"' |";
-  std::cout<<right_grammar[productions]<<left_grammar[0]<<"'"<<std::endl;
+  std::cout<<right_grammar[productions-1]<<left_grammar[0]<<"'"<<std::endl;
   std::cout<<left_grammar[0]<<"' -> "<<temp_grammar<<" | "<<"e"<<std::endl;
+}
+
+void GRAMMAR_SOURCE::CHECK_LEFT_FACTORING(){
+  GRAMMAR_LEFT();
+  bool left_factor = true;
+  std::cout<<"Original production is:"<<std::endl<<left_grammar[0]<<" -> ";
+  for(int z = 0; z <productions-1; z++)
+  std::cout<<right_grammar[z]<<" |";
+  std::cout<<right_grammar[productions-1]<<std::endl;
+  for(int x= 1; x < productions; x++)
+  if(right_grammar[x-1][0]!=right_grammar[x][0]) 
+  left_factor = false;
+  if(left_factor == true)
+  REMOVE_FACTORING();
+
+}
+
+void GRAMMAR_SOURCE::REMOVE_FACTORING(){
+  std::string temp_grammar[productions];
+  unsigned int temp = 1;
+  std::cout<<"Left Factoring removed productions are:"<<std::endl<<left_grammar[0]<<" -> ";
+  std::cout<<right_grammar[0][0]<<left_grammar[0]<<"'"<<std::endl;
+  std::cout<<left_grammar[0]<<"' -> ";
+  for(int z = 0; z <productions; z++){
+  temp = 1;
+  while(right_grammar[z][temp]!='\0'){
+  if(right_grammar[z][1]=='\0'){
+  temp_grammar[z] = 'e';
+  break;
+  }
+  else
+  temp_grammar[z]+=right_grammar[z][temp];
+  temp++;
+  }
+  }
+  for(int y = 0; y < productions-1; y++) 
+  std::cout<<temp_grammar[y]<<" | ";
+  std::cout<<temp_grammar[productions-1]<<std::endl;
 }
 
 //we make the user input the grammars in a way. 
@@ -92,10 +129,15 @@ void GRAMMAR_SOURCE::REMOVE_RECURSION(){
 //B -> A
 
 //will need to store lefts, and first rights, and second and third rights.
+//tbd left factoring: 
+// A -> xACB | xBCD
+// A -> xA'
+// A' -> ACB | BCD
 
 int main(){
-  std::string test = "A->Axyz|C|D";
+  std::string test = "A->xA|xC|xD";
   char* source = &test[0];
   GRAMMAR_SOURCE GS(source);
   GS.CHECK_LEFT_RECURCSION();
+  GS.CHECK_LEFT_FACTORING();
 }
