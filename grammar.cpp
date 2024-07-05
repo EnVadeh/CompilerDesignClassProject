@@ -36,11 +36,11 @@ void GRAMMAR_SOURCE::GRAMMAR_LEFT(){ // A -> B
 void GRAMMAR_SOURCE::GRAMMAR_RIGHT(){ //A->BC|C
   while(c!='\0'){
   SKIP_SPACE();
-  if(c=='|'){//right now even if there's |, the different rules are being merged
+  if(c=='|'){//right now even if there's |, the different rules are being merged.. fixed
   GRAMMAR_NEXT();
   productions++;
   }
-  right_grammar[productions-1] += c; //ofc this doesn't work if the grammar has error like this: A->B|... 
+  right_grammar[productions-1] += c; //ofc this doesn't work if the grammar has error like this: A->B|
   GRAMMAR_NEXT();
   }
 }
