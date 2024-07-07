@@ -22,6 +22,7 @@ public:
     std::map<char, std::vector<std::string>> grammar_rules; 
     std::map<char, std::set<char>> first_sets;
     std::map<char, std::set<char>> follow_sets;
+    std::map<std::pair<char, char>, std::string> parsing_table;
 
     PARSING_SOURCE(char* source);
 
@@ -36,6 +37,9 @@ public:
     std::set<char> FIRST(const std::string& s);
     void PRINT_FIRST_SETS();
     void PRINT_FOLLOW_SETS();
+    void CREATE_PARSING_TABLE();
+    void PRINT_PARSING_TABLE();
+    bool SIMULATE_LL1_PARSING(const std::string& input);
 };
 
 #endif

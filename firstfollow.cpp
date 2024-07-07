@@ -1,6 +1,7 @@
 #include "firstfollow.h"
 #include <iostream>
 #include <algorithm>
+#include <stack>
 
 PARSING_SOURCE::PARSING_SOURCE(char* source) {
     this->source = source;
@@ -48,7 +49,10 @@ void PARSING_SOURCE::PARSE_GRAMMAR() {
 }
 
 void PARSING_SOURCE::ADD_RULE(char non_terminal, const std::string& production) {
-    grammar_rules[non_terminal].push_back(production); //just what the map expects, a key value
+    std::string trimmed_production = production;
+    trimmed_production.erase(0, trimmed_production.find_first_not_of(" \t\n\r"));
+    trimmed_production.erase(trimmed_production.find_last_not_of(" \t\n\r") + 1);
+    grammar_rules[non_terminal].push_back(trimmed_production);
 }
 
 void PARSING_SOURCE::PRINT_GRAMMAR() {
@@ -162,8 +166,112 @@ void PARSING_SOURCE::PRINT_FOLLOW_SETS() {
     }
 }
 
+void PARSING_SOURCE::CREATE_PARSING_TABLE() {
+    std::cout << "Creating parsing table..." << std::endl;
+    for (const auto& rule : grammar_rules) {
+        char non_terminal = rule.first;
+        for (const auto& production : rule.second) {
+            std::set<char> first = FIRST(production);
+            std::cout << "FIRST(" << production << ") = { ";
+            for (char c : first) std::cout << c << " ";
+            std::cout << "}" << std::endl;
+            
+            for (char terminal : first) {
+                if (terminal != '#' && terminal != ' ') {
+                    parsing_table[{non_terminal, terminal}] = production;
+                    std::cout << "Added to table: " << non_terminal << ", " << terminal << " -> " << production << std::endl;
+                }
+            }
+            if (first.find('#') != first.end() || first.find(' ') != first.end()) {
+                std::set<char> follow = follow_sets[non_terminal];
+                std::cout << "FOLLOW(" << non_terminal << ") = { ";
+                for (char c : follow) std::cout << c << " ";
+                std::cout << "}" << std::endl;
+                
+                for (char terminal : follow) {
+                    if (terminal != ' ') {
+                        parsing_table[{non_terminal, terminal}] = production;
+                        std::cout << "Added to table: " << non_terminal << ", " << terminal << " -> " << production << std::endl;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void PARSING_SOURCE::PRINT_PARSING_TABLE() {
+    std::cout << "LL(1) Parsing Table:" << std::endl;
+    for (const auto& entry : parsing_table) {
+        std::cout << entry.first.first << ", " << entry.first.second << " -> " << entry.second << std::endl;
+    }
+}
+
+bool PARSING_SOURCE::SIMULATE_LL1_PARSING(const std::string& input) {
+    std::stack<char> stack;
+    stack.push('$');
+    stack.push('S');  // Start symbol
+    size_t input_pos = 0;
+
+    std::cout << "Simulating LL(1) parsing for input: " << input << std::endl;
+
+    while (!stack.empty()) {
+        char top = stack.top();
+        char current_input = (input_pos < input.length()) ? input[input_pos] : '$';
+
+        std::cout << "Stack: ";
+        std::stack<char> temp_stack = stack;
+        std::string stack_content;
+        while (!temp_stack.empty()) {
+            stack_content = temp_stack.top() + stack_content;
+            temp_stack.pop();
+        }
+        std::cout << stack_content;
+        std::cout << "\tInput: " << input.substr(input_pos) << "$" << std::endl;
+
+        if (top == '$' && current_input == '$') {
+            std::cout << "Parsing completed successfully" << std::endl;
+            return true;
+        }
+
+        if (isupper(top)) {  // Non-terminal
+            auto it = parsing_table.find({top, current_input});
+            if (it == parsing_table.end()) {
+                std::cout << "No production rule found for " << top << " and " << current_input << std::endl;
+                return false;  
+            }
+            std::string production = it->second;
+            std::cout << "Applied rule: " << top << " -> " << production << std::endl;
+            stack.pop();
+            if (production != "#") {  // '#' represents ε (epsilon)
+                for (int i = production.length() - 1; i >= 0; i--) {
+                    if (production[i] != ' ') {  // for some reason there was empty string? And it kept asking for an empty string after each match
+                        stack.push(production[i]);
+                    }
+                }
+            }
+        } else if (top == current_input) {
+            std::cout << "Matched " << top << std::endl;
+            stack.pop();
+            input_pos++;
+        } else if (top == ' ') {  // same reason as above, just in case, even though removing this doesn't seem to cause any problems 
+            stack.pop();
+        } else {
+            std::cout << "Mismatch: expected '" << top << "', got '" << current_input << "'" << std::endl;
+            return false;  
+        }
+    }
+
+    if (input_pos < input.length()) {
+        std::cout << "Parsing failed: input not fully consumed" << std::endl;
+        return false;
+    }
+
+    std::cout << "Parsing completed successfully" << std::endl;
+    return true;
+}
+
 int main() {
-    std::string test = "S->AB\nS->bC\nA->b\nA->#\nB->aD\nC->AD\nD->aS\nD->c";
+    std::string test = "S -> AB \n A -> aA \n A-> b \n B -> CA \n C -> cC \n C-> #";
     char* source = &test[0];
     PARSING_SOURCE ps(source);
     
@@ -175,6 +283,18 @@ int main() {
     
     ps.COMPUTE_FOLLOW_SETS(); //Both printed in ascending order
     ps.PRINT_FOLLOW_SETS();//because defauly property of map, it's more of a hassel to just chyange the order
+
+    ps.CREATE_PARSING_TABLE();
+    ps.PRINT_PARSING_TABLE();
+
+    std::string input = "bb";
+    
+    bool result = ps.SIMULATE_LL1_PARSING(input);
+    std::cout<<"The string was ";
+    if(result)
+    std::cout<<"parsed successfully";
+    else
+    std::cout<<"not parsed successfully";
 
     return 0;
 }
