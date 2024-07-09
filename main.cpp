@@ -68,5 +68,6 @@ void compile_file(const char* filename) {
 
 
 int main(){
+    std::cout<<std::endl;
     compile_file("try.txt");
 }
