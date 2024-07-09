@@ -4,242 +4,164 @@
 
 //6. Write a program to simulate the parsing process of LR grammar. Take necessary measure to use parsing table.
 
+void Parser::initializeTables() {
+    // Action table
+    actionTable[0][TokenType::NUMBER] = "S5";
+    actionTable[0][TokenType::LPAREN] = "S4";
+    actionTable[1][TokenType::PLUS] = "S6";
+    actionTable[1][TokenType::END] = "ACC";
+    actionTable[2][TokenType::PLUS] = "R2";
+    actionTable[2][TokenType::MULTIPLY] = "S7";
+    actionTable[2][TokenType::RPAREN] = "R2";
+    actionTable[2][TokenType::END] = "R2";
+    actionTable[3][TokenType::PLUS] = "R4";
+    actionTable[3][TokenType::MULTIPLY] = "R4";
+    actionTable[3][TokenType::RPAREN] = "R4";
+    actionTable[3][TokenType::END] = "R4";
+    actionTable[4][TokenType::NUMBER] = "S5";
+    actionTable[4][TokenType::LPAREN] = "S4";
+    actionTable[5][TokenType::PLUS] = "R6";
+    actionTable[5][TokenType::MULTIPLY] = "R6";
+    actionTable[5][TokenType::RPAREN] = "R6";
+    actionTable[5][TokenType::END] = "R6";
+    actionTable[6][TokenType::NUMBER] = "S5";
+    actionTable[6][TokenType::LPAREN] = "S4";
+    actionTable[7][TokenType::NUMBER] = "S5";
+    actionTable[7][TokenType::LPAREN] = "S4";
+    actionTable[8][TokenType::PLUS] = "S6";
+    actionTable[8][TokenType::RPAREN] = "S11";
+    actionTable[9][TokenType::PLUS] = "R1";
+    actionTable[9][TokenType::MULTIPLY] = "S7";
+    actionTable[9][TokenType::RPAREN] = "R1";
+    actionTable[9][TokenType::END] = "R1";
+    actionTable[10][TokenType::PLUS] = "R3";
+    actionTable[10][TokenType::MULTIPLY] = "R3";
+    actionTable[10][TokenType::RPAREN] = "R3";
+    actionTable[10][TokenType::END] = "R3";
+    actionTable[11][TokenType::PLUS] = "R5";
+    actionTable[11][TokenType::MULTIPLY] = "R5";
+    actionTable[11][TokenType::RPAREN] = "R5";
+    actionTable[11][TokenType::END] = "R5";
 
-LRParser::LRParser(const std::map<char, std::vector<std::string>>& g) : grammar(g) {
-    construct_canonical_collection();
-    construct_parsing_table();
+    // Goto table
+    gotoTable[0]["E"] = 1;
+    gotoTable[0]["T"] = 2;
+    gotoTable[0]["F"] = 3;
+    gotoTable[4]["E"] = 8;
+    gotoTable[4]["T"] = 2;
+    gotoTable[4]["F"] = 3;
+    gotoTable[6]["T"] = 9;
+    gotoTable[6]["F"] = 3;
+    gotoTable[7]["F"] = 10;
 }
 
-void LRParser::construct_canonical_collection() {
-    std::set<Item> initial_item = {{grammar.begin()->first, grammar.begin()->second[0], 0}};
-    canonical_collection.push_back(closure(initial_item));
-
-    bool changed;
-    do {
-        changed = false;
-        std::vector<std::set<Item>> new_states;
-
-        for (const auto& I : canonical_collection) {
-            std::set<char> symbols;
-            for (const auto& item : I) {
-                if (item.dot_position < item.right.length()) {
-                    symbols.insert(item.right[item.dot_position]);
-                }
-            }
-
-            for (char X : symbols) {
-                std::set<Item> goto_set = go_to(I, X);
-                if (!goto_set.empty() && 
-                    std::find(canonical_collection.begin(), canonical_collection.end(), goto_set) == canonical_collection.end() &&
-                    std::find(new_states.begin(), new_states.end(), goto_set) == new_states.end()) {
-                    new_states.push_back(goto_set);
-                    changed = true;
-                }
-            }
-        }
-
-        canonical_collection.insert(canonical_collection.end(), new_states.begin(), new_states.end());
-    } while (changed);
+void Parser::shift(int state) {
+    stateStack.push(state);
+    valueStack.push(tokens[currentToken].value);
+    currentToken++;
 }
 
-std::set<Item> LRParser::closure(const std::set<Item>& I) {
-    std::set<Item> result = I;
-    bool changed;
-    do {
-        changed = false;
-        std::set<Item> new_items;
-        for (const auto& item : result) {
-            if (item.dot_position < item.right.length() && isupper(item.right[item.dot_position])) {
-                char B = item.right[item.dot_position];
-                for (const auto& production : grammar[B]) {
-                    Item new_item = {B, production, 0};
-                    if (result.find(new_item) == result.end()) {
-                        new_items.insert(new_item);
-                        changed = true;
-                    }
-                }
-            }
-        }
-        result.insert(new_items.begin(), new_items.end());
-    } while (changed);
-    return result;
-}
+void Parser::reduce(int rule) {
+    std::string lhs;
+    int popCount;
 
-std::set<Item> LRParser::go_to(const std::set<Item>& I, char X) {
-    std::set<Item> J;
-    for (const auto& item : I) {
-        if (item.dot_position < item.right.length() && item.right[item.dot_position] == X) {
-            J.insert({item.left, item.right, item.dot_position + 1});
-        }
+    switch (rule) {
+        case 1: lhs = "E"; popCount = 3; break; // E -> E + T
+        case 2: lhs = "E"; popCount = 1; break; // E -> T
+        case 3: lhs = "T"; popCount = 3; break; // T -> T * F
+        case 4: lhs = "T"; popCount = 1; break; // T -> F
+        case 5: lhs = "F"; popCount = 3; break; // F -> ( E )
+        case 6: lhs = "F"; popCount = 1; break; // F -> number
+        default: throw std::runtime_error("Invalid rule");
     }
-    return closure(J);
+
+    for (int i = 0; i < popCount; i++) {
+        stateStack.pop();
+        valueStack.pop();
+    }
+
+    int state = stateStack.top();
+    stateStack.push(gotoTable[state][lhs]);
+    valueStack.push(lhs);
 }
 
-void LRParser::construct_parsing_table() {
-    goto_table.resize(canonical_collection.size());
-    action_table.resize(canonical_collection.size());
-
-    for (size_t i = 0; i < canonical_collection.size(); ++i) {
-        for (const auto& item : canonical_collection[i]) {
-            if (item.dot_position < item.right.length()) {
-                char symbol = item.right[item.dot_position];
-                std::set<Item> goto_set = go_to(canonical_collection[i], symbol);
-                auto it = std::find(canonical_collection.begin(), canonical_collection.end(), goto_set);
-                if (it != canonical_collection.end()) {
-                    int j = std::distance(canonical_collection.begin(), it);
-                    if (isupper(symbol)) {
-                        goto_table[i][symbol] = j;
-                    } else {
-                        action_table[i][symbol] = "s" + std::to_string(j);
-                    }
-                }
-            } else {
-                if (item.left == grammar.begin()->first && item.dot_position == item.right.length()) {
-                    action_table[i]['$'] = "acc";
-                } else {
-                    for (const auto& rule : grammar) {
-                        auto it = std::find(rule.second.begin(), rule.second.end(), item.right);
-                        if (it != rule.second.end()) {
-                            int rule_number = std::distance(grammar.begin(), std::find_if(grammar.begin(), grammar.end(),
-                                [&](const auto& p) { return &rule == &p; }));
-                            for (char c : {'a', 'b', 'c', 'd', '+', '*', '(', ')', '$'}) {
-                                action_table[i][c] = "r" + std::to_string(rule_number);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), currentToken(0) {
+    initializeTables();
 }
 
-void LRParser::print_items() {
-    for (size_t i = 0; i < canonical_collection.size(); ++i) {
-        std::cout << "I" << i << ":" << std::endl;
-        for (const auto& item : canonical_collection[i]) {
-            std::cout << "  " << item.left << " -> ";
-            for (size_t j = 0; j < item.right.length(); ++j) {
-                if (j == item.dot_position) std::cout << ".";
-                std::cout << item.right[j];
-            }
-            if (item.dot_position == item.right.length()) std::cout << ".";
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
-}
-
-void LRParser::print_parsing_table() {
-    std::cout << "Action Table:" << std::endl;
-    for (size_t i = 0; i < action_table.size(); ++i) {
-        std::cout << i << ": ";
-        for (const auto& action : action_table[i]) {
-            std::cout << action.first << ":" << action.second << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "\nGoto Table:" << std::endl;
-    for (size_t i = 0; i < goto_table.size(); ++i) {
-        std::cout << i << ": ";
-        for (const auto& goto_action : goto_table[i]) {
-            std::cout << goto_action.first << ":" << goto_action.second << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
-bool LRParser::parse(const std::string& input) {
-    std::stack<int> state_stack;
-    state_stack.push(0);  // Initial state
-    size_t input_pos = 0;
-
-    std::cout << "Input string: " << input << std::endl;
+bool Parser::parse() {
+    stateStack.push(0);
 
     while (true) {
-        int s = state_stack.top();
-        char a = (input_pos < input.length()) ? input[input_pos] : '$';
+        int state = stateStack.top();
+        TokenType token = tokens[currentToken].type;
 
-        std::cout << "Current state: " << s << ", Next input: " << a 
-                  << " (position " << input_pos << ")" << std::endl;
-        std::cout << "Stack: ";
-        std::stack<int> temp = state_stack;
-        while (!temp.empty()) {
-            std::cout << temp.top() << " ";
-            temp.pop();
-        }
-        std::cout << std::endl;
-
-        if (action_table[s].find(a) == action_table[s].end()) {
-            std::cout << "Error: No action defined for state " << s << " and input " << a << std::endl;
-            return false;
+        if (actionTable[state].find(token) == actionTable[state].end()) {
+            return false; // Error: No action defined
         }
 
-        std::string action = action_table[s][a];
-        std::cout << "Action: " << action << std::endl;
-        
-        if (action[0] == 's') {
-            int next_state = std::stoi(action.substr(1));
-            state_stack.push(next_state);
-            input_pos++;
-            std::cout << "Shifted to state " << next_state << ", advanced input to position " << input_pos << std::endl;
-        } else if (action[0] == 'r') {
-            int rule = std::stoi(action.substr(1));
-            auto it = grammar.begin();
-            std::advance(it, rule);
-            int pop_count = it->second[0].length();
-            
-            std::cout << "Reducing by rule: " << it->first << " -> " << it->second[0] << std::endl;
-            std::cout << "Pop count: " << pop_count << ", Stack size: " << state_stack.size() << std::endl;
+        std::string action = actionTable[state][token];
 
-            if (state_stack.size() <= pop_count) {
-                std::cout << "Warning: Attempted to pop more elements than exist in the stack. Adjusting pop count." << std::endl;
-                pop_count = state_stack.size() - 1;  // Ensure we don't pop the initial state
-            }
-
-            for (int i = 0; i < pop_count; ++i) {
-                state_stack.pop();
-            }
-
-            int t = state_stack.top();
-            if (goto_table[t].find(it->first) == goto_table[t].end()) {
-                std::cout << "Error: No goto action for state " << t << " and non-terminal " << it->first << std::endl;
-                return false;
-            }
-            int goto_state = goto_table[t][it->first];
-            state_stack.push(goto_state);
-            std::cout << "After reduction, pushed state " << goto_state << " onto stack" << std::endl;
-        } else if (action == "acc") {
-            std::cout << "Input accepted" << std::endl;
-            return true;
+        if (action[0] == 'S') {
+            shift(std::stoi(action.substr(1)));
+        } else if (action[0] == 'R') {
+            reduce(std::stoi(action.substr(1)));
+        } else if (action == "ACC") {
+            return true; // Accepted
         } else {
-            std::cout << "Error: Invalid action " << action << std::endl;
-            return false;
+            return false; // Error: Invalid action
         }
     }
 }
 
+std::vector<Token> tokenize(const std::string& input) {
+    std::vector<Token> tokens;
+    std::string current;
+
+    for (char c : input) {
+        if (std::isdigit(c)) {
+            current += c;
+        } else {
+            if (!current.empty()) {
+                tokens.push_back({TokenType::NUMBER, current});
+                current.clear();
+            }
+            switch (c) {
+                case '+': tokens.push_back({TokenType::PLUS, "+"}); break;
+                case '*': tokens.push_back({TokenType::MULTIPLY, "*"}); break;
+                case '(': tokens.push_back({TokenType::LPAREN, "("}); break;
+                case ')': tokens.push_back({TokenType::RPAREN, ")"}); break;
+                case ' ': break; // Ignore spaces
+                default: throw std::runtime_error(std::string("Invalid character: ") + c);
+            }
+        }
+    }
+
+    if (!current.empty()) {
+        tokens.push_back({TokenType::NUMBER, current});
+    }
+
+    tokens.push_back({TokenType::END, "$"});
+    return tokens;
+}
 
 int main() {
-    std::map<char, std::vector<std::string>> grammar = {
-        {'S', {"E"}},
-        {'E', {"E+T", "T"}},
-        {'T', {"T*F", "F"}},
-        {'F', {"(E)", "d"}}
-    };
+    std::string input;
+    std::cout << "Enter an arithmetic expression: ";
+    std::getline(std::cin, input);
 
-    LRParser parser(grammar);
+    try {
+        std::vector<Token> tokens = tokenize(input);
+        Parser parser(tokens);
 
-    std::cout << "LR(0) Items:" << std::endl;
-    parser.print_items();
-
-    std::cout << "Parsing Table:" << std::endl;
-    parser.print_parsing_table();
-
-    std::string input = "dd";
-    std::cout << "Parsing input: " << input << std::endl;
-    bool result = parser.parse(input);
-    std::cout << "Parsing result: " << (result ? "Success" : "Failure") << std::endl;
+        if (parser.parse()) {
+            std::cout << "Parsing successful!" << std::endl;
+        } else {
+            std::cout << "Parsing failed." << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
 
     return 0;
 }
