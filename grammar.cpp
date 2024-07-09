@@ -139,8 +139,9 @@ void GRAMMAR_SOURCE::REMOVE_FACTORING(){
 
 int main(){
   std::string test = "A->xA|xC|xD";
+  //std::string test = "A->Axyz|B|C";
   char* source = &test[0];
   GRAMMAR_SOURCE GS(source);
-  GS.CHECK_LEFT_RECURCSION();
+  //GS.CHECK_LEFT_RECURCSION();
   GS.CHECK_LEFT_FACTORING();
 }

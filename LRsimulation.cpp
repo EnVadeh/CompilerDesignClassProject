@@ -5,7 +5,6 @@
 //6. Write a program to simulate the parsing process of LR grammar. Take necessary measure to use parsing table.
 
 void Parser::initializeTables() {
-    // Action table
     actionTable[0][TokenType::NUMBER] = "S5";
     actionTable[0][TokenType::LPAREN] = "S4";
     actionTable[1][TokenType::PLUS] = "S6";
@@ -43,7 +42,6 @@ void Parser::initializeTables() {
     actionTable[11][TokenType::RPAREN] = "R5";
     actionTable[11][TokenType::END] = "R5";
 
-    // Goto table
     gotoTable[0]["E"] = 1;
     gotoTable[0]["T"] = 2;
     gotoTable[0]["F"] = 3;
@@ -107,9 +105,9 @@ bool Parser::parse() {
         } else if (action[0] == 'R') {
             reduce(std::stoi(action.substr(1)));
         } else if (action == "ACC") {
-            return true; // Accepted
+            return true; 
         } else {
-            return false; // Error: Invalid action
+            return false; 
         }
     }
 }
@@ -131,7 +129,7 @@ std::vector<Token> tokenize(const std::string& input) {
                 case '*': tokens.push_back({TokenType::MULTIPLY, "*"}); break;
                 case '(': tokens.push_back({TokenType::LPAREN, "("}); break;
                 case ')': tokens.push_back({TokenType::RPAREN, ")"}); break;
-                case ' ': break; // Ignore spaces
+                case ' ': break;
                 default: throw std::runtime_error(std::string("Invalid character: ") + c);
             }
         }

@@ -6,7 +6,6 @@
 //4. Write a program to identify FIRST and FOLLOW from the given grammar.
 //5. Write a program to simulate the parsing process of LL(1) grammar. Take necessary measure to use parsing table.
 
-
 PARSING_SOURCE::PARSING_SOURCE(char* source) {
     this->source = source;
     i = 0;
@@ -286,7 +285,7 @@ int main() {
     ps.PRINT_FIRST_SETS();
     
     ps.COMPUTE_FOLLOW_SETS(); //Both printed in ascending order
-    ps.PRINT_FOLLOW_SETS();//because defauly property of map, it's more of a hassel to just chyange the order
+    ps.PRINT_FOLLOW_SETS();//because defauly property of map, it's more of a hassel to just chyange the order 
 
     ps.CREATE_PARSING_TABLE();
     ps.PRINT_PARSING_TABLE();
@@ -296,9 +295,9 @@ int main() {
     bool result = ps.SIMULATE_LL1_PARSING(input);
     std::cout<<"The string was ";
     if(result)
-    std::cout<<"parsed successfully";
+    std::cout<<"parsed successfully!";
     else
-    std::cout<<"not parsed successfully";
+    std::cout<<"not parsed successfully!";
 
     return 0;
 }

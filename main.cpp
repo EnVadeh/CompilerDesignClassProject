@@ -21,7 +21,6 @@ std::string readfile(const char* filename) {
     return buffer;
 }
 
-
 void compile(char* src) {
     LEXER_L* lexer = init_lexer(src);
     TOKEN_T* tok = nullptr;
@@ -60,11 +59,13 @@ void compile(char* src) {
     }
 }
 
+
 void compile_file(const char* filename) {
     std::string src_name = readfile(filename);
     char* src = &src_name[0];
     compile(src);
 }
+
 
 int main(){
     compile_file("try.txt");

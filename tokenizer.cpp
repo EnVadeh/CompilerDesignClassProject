@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-//1. Given a simple program (Example: sum of numbers or Fibonacci number calculation or any simple program), write a program to identify the tokens. Your program should open the text file and scan every tokens from that program and tabulate it.
 
 
 //initialising the static variable
@@ -15,7 +14,6 @@ int TOKEN_COUNTER_STRUCT::max_token = 0;
 
 //wanted to tokenize for an entire line, but I think I shoudl tokenize until there's a semicolon because then the smicolon has an actual usage
 
-//problem: if special symbols are right next to the alphanumeric values, they're not tokenized!
 TOKEN_T* tokenizer(char* src, int itype) {
     TOKEN_T* token = new(struct TOKEN_STRUCT);
     if (src == 0 ) {
