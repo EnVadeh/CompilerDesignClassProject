@@ -212,7 +212,7 @@ void PARSING_SOURCE::PRINT_PARSING_TABLE() {
 bool PARSING_SOURCE::SIMULATE_LL1_PARSING(const std::string& input) {
     std::stack<char> stack;
     stack.push('$');
-    stack.push('S');  // Start symbol
+    stack.push('A');  // Start symbol
     size_t input_pos = 0;
 
     std::cout << "Simulating LL(1) parsing for input: " << input << std::endl;
@@ -274,7 +274,7 @@ bool PARSING_SOURCE::SIMULATE_LL1_PARSING(const std::string& input) {
 }
 
 int main() {
-    std::string test = "S -> AB \n A -> aA \n A-> b \n B -> CA \n C -> cC \n C-> #";
+    std::string test = "A -> BC \n B -> aB \n B-> b \n C -> DB \n D -> cD \n D-> #";
     char* source = &test[0];
     PARSING_SOURCE ps(source);
     
