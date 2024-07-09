@@ -2,6 +2,7 @@
 #include "tokenizer.h"
 #include <fstream>
 #include <string>
+//1. Given a simple program (Example: sum of numbers or Fibonacci number calculation or any simple program), write a program to identify the tokens. Your program should open the text file and scan every tokens from that program and tabulate it.
 
 
 std::string readfile(const char* filename) {
@@ -51,8 +52,6 @@ void compile(char* src) {
             delete tok;
         
         }
-        std::cout << "Line starts at: " << line_start << std::endl;
-        std::cout << "Line ends at: " << line_end << std::endl;
         if (src[line_end] == '\0') {
             break;
         }

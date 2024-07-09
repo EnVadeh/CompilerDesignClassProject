@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <stack>
 
+//4. Write a program to identify FIRST and FOLLOW from the given grammar.
+//5. Write a program to simulate the parsing process of LL(1) grammar. Take necessary measure to use parsing table.
+
+
 PARSING_SOURCE::PARSING_SOURCE(char* source) {
     this->source = source;
     i = 0;

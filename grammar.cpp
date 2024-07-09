@@ -3,6 +3,9 @@
 #include "grammar.h"
 #include <cstring>
 
+//2. Write a program to remove the left recursion from the given grammar.
+//3. Write a program to demonstrate left factoring from a left factored grammar.
+
 GRAMMAR_SOURCE::GRAMMAR_SOURCE(char* source){
   this->source = source;
   i = 0;
