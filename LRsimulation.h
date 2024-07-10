@@ -39,6 +39,7 @@ private:
 public:
     Parser(const std::vector<Token>& tokens);
     bool parse();
+    void printParsingTable();
 };
 
 std::vector<Token> tokenize(const std::string& input);

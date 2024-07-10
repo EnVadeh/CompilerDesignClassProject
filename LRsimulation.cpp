@@ -112,6 +112,37 @@ bool Parser::parse() {
     }
 }
 
+void Parser::printParsingTable() {
+    std::cout << "Action Table:\n";
+    std::cout << "State\tNUMBER\tPLUS\tMULTIPLY\tLPAREN\tRPAREN\tEND\n";
+    for (int i = 0; i <= 11; i++) {
+        std::cout << i << "\t";
+        for (TokenType t : {TokenType::NUMBER, TokenType::PLUS, TokenType::MULTIPLY, TokenType::LPAREN, TokenType::RPAREN, TokenType::END}) {
+            if (actionTable[i].find(t) != actionTable[i].end()) {
+                std::cout << actionTable[i][t] << "\t";
+            } else {
+                std::cout << "-\t";
+            }
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "\nGoto Table:\n";
+    std::cout << "State\tE\tT\tF\n";
+    for (int i = 0; i <= 11; i++) {
+        std::cout << i << "\t";
+        for (const std::string& nt : {"E", "T", "F"}) {
+            if (gotoTable[i].find(nt) != gotoTable[i].end()) {
+                std::cout << gotoTable[i][nt] << "\t";
+            } else {
+                std::cout << "-\t";
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+
 std::vector<Token> tokenize(const std::string& input) {
     std::vector<Token> tokens;
     std::string current;
@@ -148,18 +179,15 @@ int main() {
     std::cout << "Enter an arithmetic expression: ";
     std::getline(std::cin, input);
 
-    try {
-        std::vector<Token> tokens = tokenize(input);
-        Parser parser(tokens);
+    std::vector<Token> tokens = tokenize(input);
+    Parser parser(tokens);
+    parser.printParsingTable();
 
         if (parser.parse()) {
             std::cout << "Parsing successful!" << std::endl;
         } else {
             std::cout << "Parsing failed." << std::endl;
         }
-    } catch (const std::exception& e) {
-        std::cout << "Error: " << e.what() << std::endl;
-    }
 
     return 0;
 }
