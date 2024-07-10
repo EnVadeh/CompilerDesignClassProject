@@ -20,6 +20,8 @@ struct TOKEN_STRUCT
 		TOKEN_SUB,
 		TOKEN_MUL,
 		TOKEN_DIV,
+		TOKEN_CS, //control statement such as if, else
+		TOKEN_LP, //Loops
 		TOKEN_EOF
 	}types;     // stores the value of the enum for that instance
 };

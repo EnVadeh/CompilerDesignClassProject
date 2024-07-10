@@ -18,6 +18,7 @@ TOKEN_T* tokenizer(char* src, int itype) {
     TOKEN_T* token = new(struct TOKEN_STRUCT);
     if (src == 0 ) {
         token->types = token->TOKEN_EOF;
+        
         return nullptr;
     }
     else {
@@ -76,7 +77,13 @@ TOKEN_T* parse_id(LEXER_L* lexer) {
     }
     char* valuestr = &value[0];
     //lexer_special_character(lexer);
+    if(value == "if" || value == "else")
+    return tokenizer(valuestr, TOKEN_STRUCT::TOKEN_CS);
+    else if(value == "while" || value == "for")
+    return tokenizer(valuestr, TOKEN_STRUCT::TOKEN_LP);
+    else
     return tokenizer(valuestr, TOKEN_STRUCT::TOKEN_ID);
+    
 }
 
 TOKEN_T* parse_num(LEXER_L* lexer) {
