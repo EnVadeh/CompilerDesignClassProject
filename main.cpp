@@ -4,6 +4,7 @@
 #include <string>
 //1. Given a simple program (Example: sum of numbers or Fibonacci number calculation or any simple program), write a program to identify the tokens. Your program should open the text file and scan every tokens from that program and tabulate it.
 
+//the language follows cpp syntax kind of without typed variables. Check tokenizer.h for more information
 
 std::string readfile(const char* filename) {
     std::ifstream file(filename, std::ios::in);

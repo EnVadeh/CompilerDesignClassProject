@@ -22,6 +22,8 @@ struct TOKEN_STRUCT
 		TOKEN_DIV,
 		TOKEN_CS, //control statement such as if, else
 		TOKEN_LP, //Loops
+		TOKEN_LT, 
+		TOKEN_GT,
 		TOKEN_EOF
 	}types;     // stores the value of the enum for that instance
 };

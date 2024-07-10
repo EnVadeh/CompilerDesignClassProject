@@ -11,8 +11,7 @@
 int TOKEN_COUNTER_STRUCT::counter = 0;
 int TOKEN_COUNTER_STRUCT::max_token = 0;
 
-
-//wanted to tokenize for an entire line, but I think I shoudl tokenize until there's a semicolon because then the smicolon has an actual usage
+//this is a pretty simple tokenizer, built form scartch. It can tokenize all the things defined in the headerfile, so check that for reference. 
 
 TOKEN_T* tokenizer(char* src, int itype) {
     TOKEN_T* token = new(struct TOKEN_STRUCT);
@@ -135,6 +134,12 @@ TOKEN_T* lexer_next_token(LEXER_L* lexer) {
             break;
         case '/':
             return lexer_advance_current(lexer, TOKEN_STRUCT::TOKEN_DIV);
+            break;
+        case '<':
+            return lexer_advance_current(lexer, TOKEN_STRUCT::TOKEN_LT);
+            break;
+        case '>':
+            return lexer_advance_current(lexer, TOKEN_STRUCT::TOKEN_GT);
             break;
 
         case '\0': break;
